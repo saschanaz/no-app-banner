@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         no-app-banner
 // @namespace    http://github.com/saschanaz/no-app-banner
-// @version      0.1
+// @version      0.1.1
 // @description  Hide annoying banners that suggests installing apps
 // @author       Kagami Sascha Rosylight
 // @match        https://m.joongna.com/home
 // @match        https://www1.president.go.kr/petitions*
 // @match        https://www.reddit.com/*
 // @grant        none
+// @updateURL    https://github.com/saschanaz/no-app-banner/raw/main/no-app-banner.user.js
 // ==/UserScript==
 
 (function() {
@@ -21,11 +22,23 @@
         document.head.append(style);
     }
 
+    function createCSSChangeObserver(element, callback) {
+        const observer = new MutationObserver(callback);
+        observer.observe(element, {
+            attributes: true,
+            attributeFilter: ["style"],
+        });
+    }
+
     if (location.host === "m.joongna.com") {
         // Removing portal breaks the page
         document.getElementById("portal").setAttribute("hidden", "");
-        document.body.style.overflow = "";
         insertStyle("footer + div { display: none }");
+        document.body.style.overflow = "initial";
+        createCSSChangeObserver(document.body, () => {
+            document.body.style.overflow = "initial";
+        });
+
     } else if (location.host === "www1.president.go.kr") {
         document.getElementById("app_connect").remove();
     } else if (location.host === "www.reddit.com") {
